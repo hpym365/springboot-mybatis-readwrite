@@ -1,0 +1,30 @@
+https://hscck361.mirror.aliyuncs.com
+
+
+docker run -d -p 127.0.0.1:3306:3306 –name mysql -v /Users/flyrPc/docker/mysql/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123456 mysql:latest
+
+docker run -d -p 127.0.0.1:3310:3306 –name mysql -v /Users/hpym365/docker/mysql/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123456 mysql:latest
+
+docker run -p 3310:3306 --name master -v /Users/hpym365/docker/mysql/conf/master:/etc/mysql -v /Users/hpym365/docker/mysql/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
+
+docker run -p 3312:3306 --name slave -v /Users/hpym365/docker/mysql/conf/slave:/etc/mysql -v /Users/hpym365/docker/mysql/slave/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
+
+SHOW MASTER STATUS;
+忽略错误
+SET GLOBAL SQL_SLAVE_SKIP_COUNTER = 1;
+
+change master to master_host='172.17.0.2',master_port=3306,master_user='mysync',master_password='q123456',master_log_file='master-bin.000003',master_log_pos=154;
+
+start slave;
+
+Show slave status \G
+
+
+主从复制
+master
+mysqldump -uroot -p123456 --single_transaction --master-data=2 test > /etc/mysql/test.sql
+slave执行
+找到备份文件中的pos点
+start slave until MASTER_LOG_FILE='master-bin.000003', MASTER_LOG_POS=1692;
+mysql -uroot -p123456 --database=test < test.sql
+Slave start;
